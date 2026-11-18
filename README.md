@@ -24,10 +24,10 @@ You need a TV with **Developer Mode** on, and the packages you want from the
 
 | Package | Tile | Opens |
 | --- | --- | --- |
-| `io.github.theogal.lgsettings_1.0.1_arm.ipk` | **LG Settings** (solid gear) | LG's settings, the same as the gear in LG Home |
-| `io.github.theogal.lgquicksettings_1.0.1_arm.ipk` | **LG Quick Settings** (outlined gear) | LG's Quick Settings panel, the same as a short press of the remote's settings button |
-| `io.github.theogal.lgnotifications_1.0.1_arm.ipk` | **LG Notifications** (bell) | LG's notifications |
-| `io.github.theogal.lglivetv_1.0.1_arm.ipk` | **Live TV** (TV) | The TV tuner (Live TV source) |
+| `io.github.theogal.lgsettings_<version>_arm.ipk` | **LG Settings** (solid gear) | LG's settings, the same as the gear in LG Home |
+| `io.github.theogal.lgquicksettings_<version>_arm.ipk` | **LG Quick Settings** (outlined gear) | LG's Quick Settings panel, the same as a short press of the remote's settings button |
+| `io.github.theogal.lgnotifications_<version>_arm.ipk` | **LG Notifications** (bell) | LG's notifications |
+| `io.github.theogal.lglivetv_<version>_arm.ipk` | **Live TV** (TV) | The TV tuner (Live TV source) |
 
 **With webOS Dev Manager** (easiest): install
 [webOS Dev Manager](https://github.com/webosbrew/dev-manager-desktop) on your
@@ -36,7 +36,7 @@ computer, add your TV, then open its Apps page and install the .ipk files.
 **With the webOS CLI** (`ares-cli`), for example:
 
 ```
-ares-install --device tv io.github.theogal.lgsettings_1.0.1_arm.ipk
+ares-install --device tv io.github.theogal.lgsettings_<version>_arm.ipk
 ```
 
 Then add the tiles to your launcher like any other app.
@@ -74,7 +74,6 @@ Packages land in `dist/`. Test the launcher with `sh scripts/test.sh` (needs a
 C compiler). Redraw the icons with `python3 scripts/make-icons.py` (needs
 Pillow).
 
-## Credits
+## License
 
-Part of the [Home Helper](https://github.com/TheoGal/lg-homehelper) project.
 MIT licensed. Not affiliated with LG.
