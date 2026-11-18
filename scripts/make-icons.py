@@ -4,7 +4,7 @@
   python3 scripts/make-icons.py
 
 Writes icon.png (80 px) and largeIcon.png (130 px) into each app folder, and the
-README picture to docs/tiles.png. Needs Pillow (pip install pillow).
+README picture to docs/tiles.png. Needs Pillow and NumPy (pip install pillow numpy).
 
 Icons are full squares, coloured to the edges: LG Home and launchers such as
 Hearth give every tile their own rounded shape, and corners rounded in the icon

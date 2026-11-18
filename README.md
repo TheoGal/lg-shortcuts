@@ -83,7 +83,7 @@ python3 scripts/build.py
 
 Packages land in `dist/`. Test the launcher with `sh scripts/test.sh` (needs a
 C compiler). Redraw the icons with `python3 scripts/make-icons.py` (needs
-Pillow).
+Pillow and NumPy).
 
 ## License
 
