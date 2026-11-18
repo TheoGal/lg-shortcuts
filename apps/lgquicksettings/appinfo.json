@@ -1,6 +1,6 @@
 {
   "id": "io.github.theogal.lgquicksettings",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "native",
   "main": "launch",
   "title": "LG Quick Settings",

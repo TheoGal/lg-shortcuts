@@ -1,0 +1,17 @@
+{
+  "id": "io.github.theogal.lgaccount",
+  "version": "1.0.2",
+  "type": "native",
+  "main": "launch",
+  "title": "LG Account",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "iconColor": "#241d19",
+  "titleVisible": true,
+  "noWindow": true,
+  "noSplashOnLaunch": true,
+  "spinnerOnLaunch": false,
+  "requiredACG": [
+    "application.launcher"
+  ]
+}

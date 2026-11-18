@@ -1,9 +1,10 @@
-<p align="center"><img src="docs/tiles.png" alt="LG Shortcuts tiles" width="584"></p>
+<p align="center"><img src="docs/tiles.png" alt="LG Shortcuts tiles" width="780"></p>
 
 <h1 align="center">LG Shortcuts</h1>
 
-Four small tile apps for LG webOS TVs that open LG's own screens: **LG
-Settings**, **LG Quick Settings**, **LG Notifications** and **Live TV**. They
+Seven small tile apps for LG webOS TVs that open LG's own screens: **LG
+Settings**, **LG Quick Settings**, **LG Notifications**, **Live TV**, **LG
+Account**, **LG Search** and **TV Guide**. They
 are meant for custom launchers that don't offer a way to open these LG apps
 themselves, but they work in LG Home too. No rooting needed (Developer Mode is
 enough).
@@ -28,6 +29,9 @@ You need a TV with **Developer Mode** on, and the packages you want from the
 | `io.github.theogal.lgquicksettings_<version>_arm.ipk` | **LG Quick Settings** (outlined gear) | LG's Quick Settings panel, the same as a short press of the remote's settings button |
 | `io.github.theogal.lgnotifications_<version>_arm.ipk` | **LG Notifications** (bell) | LG's notifications |
 | `io.github.theogal.lglivetv_<version>_arm.ipk` | **Live TV** (TV) | The TV tuner (Live TV source) |
+| `io.github.theogal.lgaccount_<version>_arm.ipk` | **LG Account** (person) | LG's account screen |
+| `io.github.theogal.lgsearch_<version>_arm.ipk` | **LG Search** (magnifier) | LG's search with the on-screen keyboard, the same as the search button in LG Home |
+| `io.github.theogal.lgtvguide_<version>_arm.ipk` | **TV Guide** (programme guide) | The TV programme guide |
 
 **With webOS Dev Manager** (easiest): install
 [webOS Dev Manager](https://github.com/webosbrew/dev-manager-desktop) on your
@@ -47,7 +51,14 @@ A tile has no window of its own: it asks webOS to open the LG app and exits,
 so nothing keeps running. The app ids differ between webOS versions:
 LG Settings tries `com.palm.app.settings`, then `com.webos.app.settings`.
 LG Quick Settings opens `com.webos.app.quicksettings`, LG Notifications opens
-`com.webos.app.notificationcenter` and Live TV opens `com.webos.app.livetv`.
+`com.webos.app.notificationcenter`, Live TV opens `com.webos.app.livetv` and
+LG Account opens `com.webos.app.lgaccount`.
+
+Two tiles also pass launch parameters. LG Search opens `com.webos.app.voice`
+with `{"activateType":"mrcu","launchMode":"vkb"}` (search with the on-screen
+keyboard), then falls back to `com.webos.app.search`. TV Guide opens
+`com.webos.app.livemenu` with `{"activateType":"tvguide"}`: on a C3 that is the
+only value that opens the guide tab, as others froze the remote.
 
 The icons are full squares: LG Home and launchers give every tile their own
 rounded shape.

@@ -19,12 +19,17 @@ ROOT = Path(__file__).resolve().parents[1]
 MTIME = 1704067200  # webOS rejects epoch-zero tar dates
 
 # Each tile opens one of LG's own apps. The first app id webOS accepts is used:
-# the ids differ between webOS versions.
+# the ids differ between webOS versions. An entry is an app id, or (app id, launch params).
 SHORTCUTS = {
     'lgsettings': ['com.palm.app.settings', 'com.webos.app.settings'],
     'lgquicksettings': ['com.webos.app.quicksettings'],
     'lgnotifications': ['com.webos.app.notificationcenter'],
     'lglivetv': ['com.webos.app.livetv'],
+    'lgaccount': ['com.webos.app.lgaccount'],
+    # the voice app with the on-screen keyboard (as LG Home's search button), else plain search
+    'lgsearch': [('com.webos.app.voice', {'activateType': 'mrcu', 'launchMode': 'vkb'}), 'com.webos.app.search'],
+    # LG C3: only activateType "tvguide" opens the guide tab; other values froze the remote
+    'lgtvguide': [('com.webos.app.livemenu', {'activateType': 'tvguide'})],
 }
 
 
@@ -96,8 +101,14 @@ def build_shortcut(work, folder, targets):
     files = read_tree('apps/' + folder)
     info = json.loads(files['appinfo.json'])
     app, version = info['id'], info['version']
-    define = '-DTARGETS=' + ','.join('"%s"' % t for t in targets)
-    files['launch'] = arm_cc(work, folder + '-launch', ['src/launch.c'], define)
+    ids = [t if isinstance(t, str) else t[0] for t in targets]
+    params = ['' if isinstance(t, str) else json.dumps(t[1], separators=(',', ':')) for t in targets]
+    if any("'" in v for v in ids + params):
+        raise ValueError('Single quotes are not allowed in app ids or params')
+    # json.dumps of a plain ASCII string is also a valid C string literal
+    define = '-DTARGETS=' + ','.join(json.dumps(v) for v in ids)
+    define_params = '-DPARAMS=' + ','.join(json.dumps(v) for v in params)
+    files['launch'] = arm_cc(work, folder + '-launch', ['src/launch.c'], define, define_params)
     out = {'usr/palm/applications/' + app + '/' + n: b for n, b in files.items()}
     out['usr/palm/packages/' + app + '/packageinfo.json'] = json.dumps(
         {'id': app, 'version': version, 'app': app}).encode()

@@ -18,3 +18,12 @@ SHORTCUT_LUNA_SEND="$tmp/fake-luna" "$tmp/launch"
 grep -q 'second.app' "$tmp/calls.log"
 if SHORTCUT_LUNA_SEND=/bin/false "$tmp/launch"; then echo "a tile must fail when every id is refused"; exit 1; fi
 echo "ok launcher fallback"
+
+# Launch parameters go with their own app id only.
+rm -f "$tmp/calls.log"
+"$CC" -w -o "$tmp/launch-params" '-DTARGETS="first.app","second.app"' \
+  '-DPARAMS="{\"activateType\":\"tvguide\"}",""' src/launch.c
+SHORTCUT_LUNA_SEND="$tmp/fake-luna" "$tmp/launch-params"
+grep -q '"id":"first.app","params":{"activateType":"tvguide"}}' "$tmp/calls.log"
+grep -q '"id":"second.app"}' "$tmp/calls.log"
+echo "ok launcher params"

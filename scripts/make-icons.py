@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draw the four tile icons: white symbols on coloured squares.
+"""Draw the tile icons: white symbols on coloured squares.
 
   python3 scripts/make-icons.py
 
@@ -23,7 +23,10 @@ DARK = (36, 29, 25)
 YELLOW = (255, 196, 0)
 WHITE = (255, 255, 255)
 BLUE = (64, 168, 232)
-PINK = (236, 72, 140)
+PINK = (242, 106, 164)
+DARK_PINK = (216, 51, 122)
+NAVY = (4, 79, 160)
+TEAL = (0, 163, 163)
 GREY = (118, 124, 134)
 DARK_GREY = (72, 76, 84)
 
@@ -171,6 +174,77 @@ def lg_live_tv(size):
     return im
 
 
+# ---- Outline icons drawn on a 24-unit grid (the same symbols as Hearth's LG Home buttons) ----
+
+GRID_SCALE = 0.84  # shrink the 24-unit symbols a little to sit like the other tiles
+
+
+def grid(W):
+    """Map 24-unit coordinates to the canvas, scaled about the centre."""
+    k = GRID_SCALE * W / 24
+    return lambda x, y: (W / 2 + (x - 12) * k, W / 2 + (y - 12) * k), k
+
+
+def cap_line(d, points, colour, width):
+    """Open polyline with rounded joins and ends."""
+    d.line(points, fill=colour, width=width, joint='curve')
+    r = width / 2
+    for x, y in (points[0], points[-1]):
+        d.ellipse([x - r, y - r, x + r, y + r], fill=colour)
+
+
+def ring(d, centre, radius, colour, width):
+    """Circle stroke centred on the radius (Pillow strokes inwards)."""
+    x, y = centre
+    R = radius + width / 2
+    d.ellipse([x - R, y - R, x + R, y + R], outline=colour, width=width)
+
+
+def box(d, p0, p1, radius, colour, width):
+    """Rectangle stroke centred on its edge."""
+    h = width / 2
+    d.rounded_rectangle([p0[0] - h, p0[1] - h, p1[0] + h, p1[1] + h], radius=radius + h, outline=colour, width=width)
+
+
+def bezier(p0, p1, p2, p3, n=24):
+    return [tuple((1 - t) ** 3 * a + 3 * (1 - t) ** 2 * t * b + 3 * (1 - t) * t ** 2 * c + t ** 3 * e
+                  for a, b, c, e in zip(p0, p1, p2, p3)) for t in (i / n for i in range(n + 1))]
+
+
+def lg_account(size):
+    """Person: head and shoulders."""
+    im, d, W = canvas(size, NAVY)
+    g, k = grid(W)
+    w = stroke(W)
+    ring(d, g(12, 8.5), 3.6 * k, WHITE, w)
+    body = bezier(g(5, 19.5), g(6.2, 15.9), g(9, 14.2), g(12, 14.2)) + \
+        bezier(g(12, 14.2), g(15, 14.2), g(17.8, 15.9), g(19, 19.5))[1:]
+    cap_line(d, body, WHITE, w)
+    return im
+
+
+def lg_search(size):
+    """Magnifier."""
+    im, d, W = canvas(size, TEAL)
+    g, k = grid(W)
+    w = stroke(W)
+    ring(d, g(10.5, 10.5), 6 * k, WHITE, w)
+    cap_line(d, [g(15, 15), g(20, 20)], WHITE, w)
+    return im
+
+
+def lg_tv_guide(size):
+    """Programme guide: a screen with a picture and listing lines."""
+    im, d, W = canvas(size, DARK_PINK)
+    g, k = grid(W)
+    w = stroke(W)
+    box(d, g(3.5, 5), g(20.5, 19), 1.2 * k, WHITE, w)
+    box(d, g(6, 7.6), g(11, 11), 0, WHITE, w)
+    for a, b in ((g(6, 13.6), g(18, 13.6)), (g(6, 16.2), g(18, 16.2)), (g(13.5, 8.4), g(18, 8.4))):
+        cap_line(d, [a, b], WHITE, w)
+    return im
+
+
 def save(draw, folder):
     for size, name in ((80, 'icon.png'), (130, 'largeIcon.png')):
         im = draw(size)
@@ -179,12 +253,13 @@ def save(draw, folder):
 
 def main():
     tiles = [(lg_settings, 'lgsettings'), (lg_quick_settings, 'lgquicksettings'),
-             (lg_notifications, 'lgnotifications'), (lg_live_tv, 'lglivetv')]
+             (lg_notifications, 'lgnotifications'), (lg_live_tv, 'lglivetv'),
+             (lg_account, 'lgaccount'), (lg_search, 'lgsearch'), (lg_tv_guide, 'lgtvguide')]
     for draw, folder in tiles:
         save(draw, 'apps/' + folder)
-    # README picture: the four tiles in a row, rounded as a launcher shows them.
+    # README picture: all tiles in a row, rounded as a launcher shows them.
     size, gap = 128, 24
-    row = Image.new('RGBA', (4 * size + 3 * gap, size), (0, 0, 0, 0))
+    row = Image.new('RGBA', (len(tiles) * size + (len(tiles) - 1) * gap, size), (0, 0, 0, 0))
     for i, (draw, _) in enumerate(tiles):
         row.paste(rounded(draw(size)).resize((size, size), Image.LANCZOS), (i * (size + gap), 0))
     row.save(ROOT / 'docs/tiles.png', optimize=True)
