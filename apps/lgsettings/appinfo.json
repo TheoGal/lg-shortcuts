@@ -1,6 +1,6 @@
 {
   "id": "io.github.theogal.lgsettings",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "native",
   "main": "launch",
   "title": "LG Settings",

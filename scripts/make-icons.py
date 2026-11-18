@@ -12,6 +12,8 @@ itself show up as notches or a second, mismatched curve. Only the README
 picture is rounded here, since GitHub shows it as it is.
 """
 import math
+
+import numpy as np
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
@@ -48,8 +50,12 @@ def rounded(im):
     return out
 
 
+STROKE = 0.045  # line weight as a share of the tile, as LG's own tiles (measured on a C3)
+_stroke = STROKE  # the weight while drawing, before the symbol is scaled to size
+
+
 def stroke(W):
-    return max(2, round(W * 0.055))
+    return max(2, round(W * _stroke))
 
 
 def outline(d, points, colour, width):
@@ -245,6 +251,52 @@ def lg_tv_guide(size):
     return im
 
 
+# ---- Size every symbol like LG's own tiles ----
+
+# Largest side of the symbol as a share of the tile, measured on LG's Live TV tile (C3):
+# wide symbols 55%. Squarish ones a little smaller, so they don't look heavier.
+WIDE, SQUARE = 0.55, 0.50
+
+
+def symbol_mask(im):
+    """The white symbol as an 8-bit mask, read off the solid background."""
+    a = np.asarray(im.convert('RGB')).astype(float)
+    bg = a[0, 0]
+    ch = int(np.argmax(255 - bg))  # the channel with most room between background and white
+    alpha = np.clip((a[..., ch] - bg[ch]) / max(1.0, 255 - bg[ch]), 0, 1)
+    return Image.fromarray((alpha * 255).astype('uint8'), 'L'), tuple(int(v) for v in bg)
+
+
+def fitted(draw, target):
+    """Draw the tile, then scale its symbol so the largest side is `target` of the tile,
+    with the stroke drawn heavier first so it ends up at STROKE after scaling."""
+    global _stroke
+
+    def render(size, weight):
+        global _stroke
+        _stroke = weight
+        try:
+            im = draw(size)
+        finally:
+            _stroke = STROKE
+        mask, bg = symbol_mask(im)
+        box = mask.point(lambda v: 255 if v > 32 else 0).getbbox()
+        return im, mask, bg, box
+
+    def wrapped(size):
+        im, mask, bg, box = render(size, STROKE)
+        W = im.size[0]
+        f = target * W / max(box[2] - box[0], box[3] - box[1])
+        im, mask, bg, box = render(size, STROKE / f)  # redraw with the compensated weight
+        f = target * W / max(box[2] - box[0], box[3] - box[1])
+        sym = mask.crop(box)
+        sym = sym.resize((max(1, round(sym.size[0] * f)), max(1, round(sym.size[1] * f))), Image.LANCZOS)
+        out = Image.new('RGBA', (W, W), bg + (255,))
+        out.paste(Image.new('RGBA', sym.size, WHITE + (255,)), (round((W - sym.size[0]) / 2), round((W - sym.size[1]) / 2)), sym)
+        return out
+    return wrapped
+
+
 def save(draw, folder):
     for size, name in ((80, 'icon.png'), (130, 'largeIcon.png')):
         im = draw(size)
@@ -252,9 +304,10 @@ def save(draw, folder):
 
 
 def main():
-    tiles = [(lg_settings, 'lgsettings'), (lg_quick_settings, 'lgquicksettings'),
-             (lg_notifications, 'lgnotifications'), (lg_live_tv, 'lglivetv'),
-             (lg_account, 'lgaccount'), (lg_search, 'lgsearch'), (lg_tv_guide, 'lgtvguide')]
+    tiles = [(fitted(lg_settings, SQUARE), 'lgsettings'), (fitted(lg_quick_settings, SQUARE), 'lgquicksettings'),
+             (fitted(lg_notifications, SQUARE), 'lgnotifications'), (fitted(lg_live_tv, WIDE), 'lglivetv'),
+             (fitted(lg_account, SQUARE), 'lgaccount'), (fitted(lg_search, SQUARE), 'lgsearch'),
+             (fitted(lg_tv_guide, WIDE), 'lgtvguide')]
     for draw, folder in tiles:
         save(draw, 'apps/' + folder)
     # README picture: all tiles in a row, rounded as a launcher shows them.
