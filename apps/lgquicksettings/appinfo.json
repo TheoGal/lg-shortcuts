@@ -1,0 +1,17 @@
+{
+  "id": "io.github.theogal.lgquicksettings",
+  "version": "1.0.1",
+  "type": "native",
+  "main": "launch",
+  "title": "LG Quick Settings",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "iconColor": "#241d19",
+  "titleVisible": true,
+  "noWindow": true,
+  "noSplashOnLaunch": true,
+  "spinnerOnLaunch": false,
+  "requiredACG": [
+    "application.launcher"
+  ]
+}
